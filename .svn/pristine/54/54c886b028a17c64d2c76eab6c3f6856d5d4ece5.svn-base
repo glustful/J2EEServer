@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd" >
+<generatorConfiguration >
+ 
+<classPathEntry location="/Users/wangxuebiao/.m2/repository/mysql/mysql-connector-java/5.1.34/mysql-connector-java-5.1.34.jar" />
+ 
+  <context id="context1" >
+    <jdbcConnection driverClass="com.mysql.jdbc.Driver" connectionURL="jdbc:mysql://127.0.0.1:3306/jujiabaodb" userId="jujiabaouser" password="cwsjr1024jujiabao" />
+    <javaModelGenerator targetPackage="com.dunbian.jujiabao.appobj.generator" targetProject="" />
+    <sqlMapGenerator targetPackage="com.dunbian.jujiabao.db.generator" targetProject="" />
+    <javaClientGenerator targetPackage="com.dunbian.jujiabao.db.generator" targetProject="" type="XMLMAPPER" />
+    
+     <table tableName="t_group" 
+               domainObjectName="ManageUser">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+	</table>
+     <table tableName="t_group_region" 
+               domainObjectName="ManageUser">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+		<columnOverride column="group_id" property="groupId" javaType="String" />
+		<columnOverride column="region_id" property="regionId" javaType="String" />
+	</table>
+     <table tableName="t_manage_user" 
+               domainObjectName="ManageUser">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+	</table>
+	<table tableName="t_user" 
+               domainObjectName="User">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+	</table>
+	<table tableName="t_user_address" 
+               domainObjectName="UserAddress">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+		<columnOverride column="user_id" property="userId" javaType="String" />
+		<columnOverride column="city_id" property="cityId" javaType="String" />
+		<columnOverride column="county_id" property="countyId" javaType="String" />
+		<columnOverride column="town_id" property="townId" javaType="String" />
+		<columnOverride column="block_id" property="blockId" javaType="String" />
+		<columnOverride column="building_id" property="buildingId" javaType="String" />
+		<columnOverride column="cell_id" property="cellId" javaType="String" />
+	</table>
+	<table tableName="t_food_set" 
+               domainObjectName="FoodSet">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+	</table>
+	<table tableName="t_food_detail" 
+               domainObjectName="FoodDetail">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+	</table>
+	<table tableName="t_set_detail" 
+               domainObjectName="SetDetail">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+		<columnOverride column="set_id" property="setId" javaType="String" />
+		<columnOverride column="detail_id" property="detailId" javaType="String" />
+	</table>
+	<table tableName="t_food_week" 
+               domainObjectName="FoodWeek">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+		<columnOverride column="set_id" property="setId" javaType="String" />
+		<columnOverride column="type" property="type" javaType="String" />
+	</table>
+	<table tableName="t_order" 
+               domainObjectName="Order">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+		<columnOverride column="user_id" property="userId" javaType="String" />
+		<columnOverride column="address_id" property="addressId" javaType="String" />
+		<columnOverride column="city_id" property="cityId" javaType="String" />
+		<columnOverride column="county_id" property="countyId" javaType="String" />
+		<columnOverride column="town_id" property="townId" javaType="String" />
+		<columnOverride column="block_id" property="blockId" javaType="String" />
+		<columnOverride column="building_id" property="buildingId" javaType="String" />
+		<columnOverride column="cell_id" property="cellId" javaType="String" />
+	</table>
+	<table tableName="t_order_detail" 
+               domainObjectName="OrderDetail">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+		<columnOverride column="order_id" property="orderId" javaType="String" />
+		<columnOverride column="set_id" property="setId" javaType="String" />
+		<columnOverride column="type" property="type" javaType="String" />
+	</table>
+	<table tableName="t_order_extra" 
+               domainObjectName="OrderExtra">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+		<columnOverride column="order_id" property="orderId" javaType="String" />
+	</table>
+	<table tableName="t_region" 
+               domainObjectName="Region">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+		<columnOverride column="parent_id" property="parentId" javaType="String" />
+	</table>
+	<table tableName="t_region_time" 
+               domainObjectName="RegionTime">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+		<columnOverride column="region_id" property="regionId" javaType="String" />
+	</table>
+	<table tableName="t_comment" 
+               domainObjectName="Comment">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+		<columnOverride column="order_id" property="orderId" javaType="String" />
+		<columnOverride column="set_id" property="setId" javaType="String" />
+		<columnOverride column="user_id" property="userId" javaType="String" />
+		<columnOverride column="group_no" property="groupNo" javaType="String" />
+	</table>
+	<table tableName="t_file" 
+               domainObjectName="File">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+		<columnOverride column="user_id" property="userId" javaType="String" />
+	</table>
+	<table tableName="t_resource" 
+               domainObjectName="Resource">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+		<columnOverride column="user_id" property="userId" javaType="String" />
+		<columnOverride column="file_id" property="fileId" javaType="String" />
+		<columnOverride column="data_id" property="dataId" javaType="String" />
+	</table>
+	<table tableName="t_cart" 
+               domainObjectName="Cart">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+		<columnOverride column="user_id" property="userId" javaType="String" />
+		<columnOverride column="set_id" property="setId" javaType="String" />
+		<columnOverride column="type" property="type" javaType="String" />
+	</table>
+    <table tableName="t_config" 
+               domainObjectName="Config">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+	</table>
+	<table tableName="t_advertisement" 
+               domainObjectName="Advertisement">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+	</table>
+	<table tableName="t_advertisement_show" 
+               domainObjectName="AdvertisementShow">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+		<columnOverride column="advertisement_id" property="advertisementId" javaType="String" />
+		<columnOverride column="region_id" property="regionId" javaType="String" />
+	</table>
+	<table tableName="t_discount" 
+               domainObjectName="Discount">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+		<columnOverride column="region" property="region" javaType="String" />
+	</table>
+	<table tableName="t_discount_record" 
+               domainObjectName="DiscountRecord">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+		<columnOverride column="user_id" property="userId" javaType="String" />
+		<columnOverride column="discount_id" property="discountId" javaType="String" />
+		<columnOverride column="order_id" property="orderId" javaType="String" />
+	</table>
+	<table tableName="t_seckill" 
+               domainObjectName="Seckill">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+		<columnOverride column="region_id" property="regionId" javaType="String" />
+		<columnOverride column="type" property="type" javaType="String" />
+	</table>
+	<table tableName="t_seckill_instance" 
+               domainObjectName="SeckillInstance">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+		<columnOverride column="seckill_id" property="seckillId" javaType="String" />
+	</table>
+	<table tableName="t_seckill_result" 
+               domainObjectName="SeckillResult">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+		<columnOverride column="seckill_id" property="seckillId" javaType="String" />
+		<columnOverride column="user_id" property="userId" javaType="String" />
+		<columnOverride column="order_id" property="orderId" javaType="String" />
+		<columnOverride column="sec_instance_id" property="secInstanceId" javaType="String" />
+	</table>
+	<table tableName="t_food_type" 
+               domainObjectName="FoodType">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+		<columnOverride column="type_id" property="typeId" javaType="String" />
+	</table>
+	 <table tableName="t_goods_type" 
+               domainObjectName="GoodsType">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+	</table>
+	<table tableName="t_user_wallet" 
+               domainObjectName="UserWallet">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+		<columnOverride column="user_id" property="userId" javaType="String" />
+	</table>
+	<table tableName="t_account" 
+               domainObjectName="Account">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+	</table>
+	<table tableName="t_account_detail" 
+               domainObjectName="AccountDetail">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+		<columnOverride column="account_id" property="accountId" javaType="String" />
+		<columnOverride column="data_id" property="dataId" javaType="String" />
+		<columnOverride column="user_id" property="userId" javaType="String" />
+	</table>
+	<table tableName="t_recharge_set" 
+               domainObjectName="RechargeSet">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+	</table>
+	<table tableName="t_recharge_record" 
+               domainObjectName="RechargeRecord">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+		<columnOverride column="recharge_id" property="rechargeId" javaType="String" />
+		<columnOverride column="user_id" property="userId" javaType="String" />
+	</table>
+	<table tableName="t_pay_log"
+               domainObjectName="PayLog">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+	</table>
+	<table tableName="t_region_status" 
+               domainObjectName="RegionStatus">
+		<generatedKey  column="id" sqlStatement="select uuid_short()" identity="false"/>
+		<columnOverride column="id" property="id" javaType="String" />
+		<columnOverride column="region_id" property="regionId" javaType="String" />
+	</table>
+  </context>
+</generatorConfiguration>

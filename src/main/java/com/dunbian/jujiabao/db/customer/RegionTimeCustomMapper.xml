@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dunbian.jujiabao.db.customer.RegionTimeCustomMapper" >
+  <resultMap id="BaseResultMap" type="com.dunbian.jujiabao.appobj.extend.RegionTimeAO" >
+    <id column="id" property="id" jdbcType="DECIMAL" />
+    <result column="region_id" property="regionId" jdbcType="DECIMAL" />
+    <result column="region_name" property="regionName" jdbcType="VARCHAR" />
+    <result column="type" property="type" jdbcType="VARCHAR" />
+    <result column="start_time" property="startTime" jdbcType="TIMESTAMP" />
+    <result column="end_time" property="endTime" jdbcType="TIMESTAMP" />
+    <result column="delivery_time" jdbcType="VARCHAR" property="deliveryTime" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, region_id, region_name, type, start_time, end_time, create_time
+  </sql>
+  <select id="getRegionTimes" resultMap="BaseResultMap" parameterType="map" >
+    select  rt.id, r.id region_id, r.name region_name, rt.type,rt.start_time,rt.end_time, rt.delivery_time, rt.create_time
+    from t_region r left outer join t_region_time rt on r.id = rt.region_id 
+    where r.type = '30'
+    <if test="page != null" >
+        limit #{page.start} , #{page.pageSize}
+     </if>
+  </select>
+</mapper>

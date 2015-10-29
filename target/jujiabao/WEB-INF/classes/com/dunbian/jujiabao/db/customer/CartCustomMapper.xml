@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dunbian.jujiabao.db.customer.CartCustomMapper">
+  <resultMap id="BaseResultMap" type="com.dunbian.jujiabao.appobj.extend.CartAO">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="user_id" jdbcType="BIGINT" property="userId" />
+    <result column="set_id" jdbcType="BIGINT" property="setId" />
+    <result column="type" jdbcType="CHAR" property="type" />
+    <result column="count" jdbcType="INTEGER" property="count" />
+    <result column="cart_date" jdbcType="DATE" property="cartDate" />
+  </resultMap>
+  
+  <resultMap id="cartInfoMap" type="com.dunbian.jujiabao.appobj.extend.CartInfo">
+    <result column="amount" jdbcType="DECIMAL" property="amount" />
+    <result column="cnt" jdbcType="INTEGER" property="cnt" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, user_id, set_id, type, count, cart_date
+  </sql>
+  <insert id="insertWithId" parameterType="com.dunbian.jujiabao.appobj.generator.Cart">
+    insert into t_cart (id, user_id, set_id, 
+      type, count, cart_date)
+    values (#{id,jdbcType=BIGINT}, #{userId,jdbcType=BIGINT}, #{setId,jdbcType=BIGINT}, 
+      #{type,jdbcType=CHAR}, #{count,jdbcType=INTEGER}, #{cartDate,jdbcType=DATE})
+  </insert>
+  
+  <select id="getCartInfo" parameterType="map" resultMap="cartInfoMap">
+       select sum(a.count) cnt, SUM(b.price*a.count) amount  from t_cart a, t_food_set b where a.user_id=#{userId} and cart_date=#{today,jdbcType=DATE} and a.set_id=b.id
+  </select>
+</mapper>

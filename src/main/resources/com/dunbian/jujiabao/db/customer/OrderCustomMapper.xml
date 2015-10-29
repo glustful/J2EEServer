@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dunbian.jujiabao.db.customer.OrderCustomMapper">
+  <resultMap id="BaseResultMap" type="com.dunbian.jujiabao.appobj.extend.OrderAO">
+    <id column="o_id" jdbcType="DECIMAL" property="id" />
+    <result column="o_order_no" jdbcType="VARCHAR" property="orderNo" />
+    <result column="o_amount" jdbcType="DECIMAL" property="amount" />
+    <result column="o_status" jdbcType="CHAR" property="status" />
+    <result column="o_comment_status" jdbcType="CHAR" property="commentStatus" />
+    <result column="o_count" jdbcType="INTEGER" property="count" />
+    <result column="o_create_date" jdbcType="DATE" property="createDate" />
+    <collection property="detailList" ofType="com.dunbian.jujiabao.appobj.extend.OrderDetailAO">
+        <id column="d_id" jdbcType="DECIMAL" property="id" />
+	    <result column="d_sku_id" jdbcType="BIGINT" property="skuId" />
+	    <result column="d_set_id" jdbcType="DECIMAL" property="setId" />
+	    <result column="d_set_title" jdbcType="VARCHAR" property="setTitle" />
+	    <result column="d_type" jdbcType="CHAR" property="type" />
+	    <result column="d_price" jdbcType="DECIMAL" property="price" />
+	    <result column="d_count" jdbcType="INTEGER" property="count" />
+	    <result column="d_amount" jdbcType="DECIMAL" property="amount" />
+	    <result column="d_logo" jdbcType="VARCHAR" property="logo" />
+    </collection>
+  </resultMap>
+  <resultMap id="RealBaseResultMap" type="com.dunbian.jujiabao.appobj.extend.OrderAO">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="user_id" jdbcType="BIGINT" property="userId" />
+    <result column="order_no" jdbcType="VARCHAR" property="orderNo" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="mobile" jdbcType="VARCHAR" property="mobile" />
+    <result column="address_id" jdbcType="BIGINT" property="addressId" />
+    <result column="address" jdbcType="VARCHAR" property="address" />
+    <result column="city_id" jdbcType="BIGINT" property="cityId" />
+    <result column="county_id" jdbcType="BIGINT" property="countyId" />
+    <result column="town_id" jdbcType="BIGINT" property="townId" />
+    <result column="block_id" jdbcType="BIGINT" property="blockId" />
+    <result column="building_id" jdbcType="BIGINT" property="buildingId" />
+    <result column="cell_id" jdbcType="BIGINT" property="cellId" />
+    <result column="location" jdbcType="VARCHAR" property="location" />
+    <result column="floor" jdbcType="INTEGER" property="floor" />
+    <result column="manual_address" jdbcType="VARCHAR" property="manualAddress" />
+    <result column="amount" jdbcType="DECIMAL" property="amount" />
+    <result column="status" jdbcType="CHAR" property="status" />
+    <result column="set_type" jdbcType="CHAR" property="setType" />
+    <result column="count" jdbcType="INTEGER" property="count" />
+    <result column="trade_no" jdbcType="VARCHAR" property="tradeNo" />
+    <result column="payment_time" jdbcType="TIMESTAMP" property="paymentTime" />
+    <result column="order_from" jdbcType="CHAR" property="orderFrom" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="create_date" jdbcType="DATE" property="createDate" />
+    <result column="comment_status" jdbcType="CHAR" property="commentStatus" />
+    <result column="city_name" jdbcType="VARCHAR" property="cityName" />
+    <result column="county_name" jdbcType="VARCHAR" property="countyName" />
+    <result column="town_name" jdbcType="VARCHAR" property="townName" />
+    <result column="block_name" jdbcType="VARCHAR" property="blockName" />
+    <result column="building_name" jdbcType="VARCHAR" property="buildingName" />
+    <result column="cell_name" jdbcType="VARCHAR" property="cellName" />
+    <result column="to_pay" jdbcType="DECIMAL" property="toPay" />
+  </resultMap>
+  <select id="getOrderList" parameterType="map" resultMap="BaseResultMap">
+    select 
+    o.id o_id, o.order_no o_order_no, o.amount o_amount, o.status o_status,
+    o.count o_count, o.create_date o_create_date, o.comment_status o_comment_status,
+    d.id d_id, d.sku_id d_sku_id, d.set_id d_set_id, d.set_title d_set_title, 
+    d.type d_type, d.price d_price, d.count d_count, d.amount d_amount, d.logo d_logo
+    from 
+    (select id, order_no, amount, status,
+    count, create_date, comment_status from t_order where user_id=#{userId}
+    <if test="status != null">
+       		<if test="status == '70'">
+       			and status in ('20', '30', '40', '60')
+       		</if>
+       		<if test="status != '70'">
+            	and status=#{status}
+       		</if>
+    </if>
+    <if test="status == null">
+            and status!='00'
+    </if>   
+    order by create_time desc
+    limit #{page.start}, #{page.pageSize})
+     o, t_order_detail d
+    where o.id=d.order_id 
+  </select>
+    <select id="getOrderByOrderNo" parameterType="String" resultMap="RealBaseResultMap">
+    select * from t_order o
+    where 1=1
+    <if test="orderNo != null" >
+    	and o.order_no = #{orderNo,jdbcType=BIGINT}
+    </if>
+    limit 1 for update
+  </select>
+  <select id="getOrderByOrderId" parameterType="String" resultMap="RealBaseResultMap">
+    select * from t_order o
+    where 1=1
+    <if test="orderId != null" >
+    	and o.id = #{orderId,jdbcType=BIGINT}
+    </if>
+    for update
+  </select>
+</mapper>

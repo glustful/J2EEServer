@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dunbian.jujiabao.db.customer.FoodDetailCustomMapper">
+  <resultMap id="BaseResultMap" type="com.dunbian.jujiabao.appobj.extend.FoodDetailAO">
+    <id column="id" jdbcType="DECIMAL" property="id" />
+    <result column="code" jdbcType="VARCHAR" property="code" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="logo" jdbcType="VARCHAR" property="logo" />
+    <result column="taste" jdbcType="VARCHAR" property="taste" />
+    <result column="materials" jdbcType="VARCHAR" property="materials" />
+    <result column="type" jdbcType="CHAR" property="type" />
+    <result column="status" jdbcType="CHAR" property="status" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+   	 fd.id, fd.code, fd.name, fd.logo, fd.taste, fd.materials, fd.type, fd.status, fd.create_time
+  </sql>
+  <select id="selectBySetId" parameterType="String" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from t_set_detail sd left outer join t_food_detail fd on sd.detail_id = fd.id where 1=1
+    <if test="setId != null">
+    	and set_id =  #{setId,jdbcType=DECIMAL} 
+    </if>
+    order by fd.code
+  </select>
+</mapper>

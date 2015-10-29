@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dunbian.jujiabao.db.customer.FoodSetCustomMapper">
+  <resultMap id="BaseResultMap" type="com.dunbian.jujiabao.appobj.extend.FoodSetAO">
+    <id column="id" jdbcType="DECIMAL" property="id" />
+    <result column="sku_id" jdbcType="BIGINT" property="skuId" />
+    <result column="code" jdbcType="VARCHAR" property="code" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="logo" jdbcType="VARCHAR" property="logo" />
+    <result column="market_price" jdbcType="DECIMAL" property="marketPrice" />
+    <result column="price" jdbcType="DECIMAL" property="price" />
+    <result column="sale_count" jdbcType="INTEGER" property="saleCount" />
+    <result column="comment_count" jdbcType="INTEGER" property="commentCount" />
+    <result column="status" jdbcType="CHAR" property="status" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="set_type" jdbcType="TIMESTAMP" property="setType" />
+    <result column="week_id" jdbcType="TIMESTAMP" property="weekId" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    fs.id,fs.sku_id, fs.code, fs.name, fs.logo, fs.market_price, fs.price, fs.sale_count, fs.comment_count, fs.status, fs.create_time
+  </sql>
+  <select id="getFoodSets" parameterType="String" resultMap="BaseResultMap">
+    select
+      fs.id,fs.sku_id, fs.code, fs.name, fs.logo, fs.market_price, fs.price, fs.sale_count, fs.comment_count,
+      fs.status, fs.create_time, fw.type set_type, fw.id week_id
+    from t_food_week fw left outer join t_food_set fs on fw.set_id = fs.id
+    where 1=1 and fs.status = '10'
+    <if test="weekDay != null">
+      and fw.day = #{weekDay,jdbcType=DECIMAL}
+    </if>
+     order by fw.sort
+  </select>
+  <select id="getFoodSetByWeekId" parameterType="String" resultMap="BaseResultMap">
+    select
+      fs.id,fs.sku_id, fs.code, fs.name, fs.logo, fs.market_price, fs.price, fs.sale_count, fs.comment_count,
+      fs.status, fs.create_time, fw.type set_type, fw.id week_id
+    from t_food_week fw left outer join t_food_set fs on fw.set_id = fs.id
+    where fs.status = '10'
+    <if test="weekId != null">
+      and fw.id = #{weekId,jdbcType=DECIMAL}
+    </if>
+  </select>
+
+  <update id="updateCommentCount" parameterType="map">
+  update t_food_set set comment_count=comment_count+#{sm} where id=#{id}
+  </update>
+  <update id="updateSaleCount" parameterType="map">
+  update t_food_set set sale_count=sale_count+#{sm} where id=#{id}
+  </update>
+</mapper>

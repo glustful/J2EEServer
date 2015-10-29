@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<setting>
+	<appid>wx523867a009cb9d8a</appid>
+	<appsecret>cdba8422389d0a5c9ea608bd3865d52d</appsecret>
+	<partner>1248733501</partner>
+	<partnerkey>2799481738dhf8371849972jjb363700</partnerkey>
+	<notifyurl>http://www.66jjb.com/wcpay/result</notifyurl>
+	<notifyrechargeurl>http://www.66jjb.com/wcrecharge/result</notifyrechargeurl>
+	<hostip>211.149.227.111</hostip>
+	<url302>/wx/content.html</url302>
+	<time>7200000</time>
+</setting>

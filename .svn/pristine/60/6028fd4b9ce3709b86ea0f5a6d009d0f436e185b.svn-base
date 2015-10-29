@@ -1,0 +1,6 @@
+jdbc.url = jdbc:mysql://127.0.0.1:3306/jujiabaodb?characterEncoding=utf8
+jdbc.username = jujiabaouser
+jdbc.password = cwsjr1024jujiabao
+jdbc.maxActive = 50
+jdbc.initialSize = 10
+jdbc.maxPoolPreparedStatementPerConnectionSize = 200

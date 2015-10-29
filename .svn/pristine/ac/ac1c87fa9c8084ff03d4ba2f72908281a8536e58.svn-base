@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+    <bean id="propertyConfigurer" 
+ 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+	        <list>
+	        <!-- 
+	             <value>/WEB-INF/spring/*.properties</value>
+	         -->
+				 <value>classpath:jdbc.properties</value>
+				 <value>classpath:env.properties</value>
+	        </list>
+   		</property>
+   		<property name="fileEncoding"> 
+      		<value>UTF-8</value> 
+    	</property>
+	</bean>
+	
+    <bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor "/> 
+    <bean class="org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor"/> 
+    
+    <context:annotation-config/>
+    
+    <context:component-scan base-package="com.dunbian">
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+    <!-- 
+    <context:component-scan base-package=”XX.XX”/>
+  -->
+    <import resource="database.xml"/>
+    
+    <!-- freemarker 视图解析器配置 -->
+    <bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+        <!-- 模板文件所在目录 -->
+        <property name="templateLoaderPath" value="/WEB-INF/views/" />
+        <!-- 公用模版变量 -->
+        <property name="freemarkerVariables">
+            <map>            	
+                <entry key="serverPath" value="" />
+                <entry key="staticServerPath" value="/jjbstatic" />
+                <entry key="uploadFilePath" value="/upload" />
+                <entry key="uploaddir" value="/uploaddir" />
+                <entry key="env" value="${env}" />
+            </map>
+        </property>  
+        <!-- FreeMarker属性配置 -->
+        <property name="freemarkerSettings">
+            <props>
+                <!-- 每隔 5 秒检查模板是否更新，如果不经常更新模板可将更新的延迟时间设定长一点生成环境一定要设置长一点，24 小时以上吧 -->
+                <prop key="template_update_delay">5</prop>
+                <!-- 指定地区语言环境，我们的语言是中文 -->
+                <prop key="locale">zh_CN</prop>
+                <!-- 指定模板文件的编码格式 -->
+                <prop key="default_encoding">UTF-8</prop>  
+                <!-- 指定输出编码  -->
+                <prop key="output_encoding">UTF-8</prop>
+            </props>
+        </property>
+    </bean>
+     <bean id="sMSService" class="com.dunbian.jujiabao.message.SMSService">
+        <property name="user" value="${sms.user}"></property>
+        <property name="password" value="${sms.password}"></property>
+    </bean>
+     <bean id="fileService" class="com.dunbian.jujiabao.service.file.FileService">
+        <property name="uploadDir" value="${uploaddir}"></property>
+        <property name="totalPartition" value="1024"></property>
+        <property name="fileNameEncoding" value="utf-8"></property>
+    </bean>
+    <bean id="configUtil" class="com.dunbian.jujiabao.util.ConfigUtil">
+    </bean>
+</beans>

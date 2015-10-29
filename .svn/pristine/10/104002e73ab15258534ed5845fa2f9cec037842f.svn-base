@@ -1,0 +1,453 @@
+package com.dunbian.jujiabao.mvc;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.dunbian.jujiabao.appobj.extend.AdvertisementAO;
+import com.dunbian.jujiabao.appobj.extend.CommentAO;
+import com.dunbian.jujiabao.appobj.extend.FoodSetAO;
+import com.dunbian.jujiabao.appobj.extend.FoodWeekAO;
+import com.dunbian.jujiabao.appobj.extend.RegionAO;
+import com.dunbian.jujiabao.appobj.extend.RegionTimeAO;
+import com.dunbian.jujiabao.appobj.extend.SeckillAO;
+import com.dunbian.jujiabao.appobj.extend.UserAO;
+import com.dunbian.jujiabao.appobj.extend.UserAddressAO;
+import com.dunbian.jujiabao.food.IFoodService;
+import com.dunbian.jujiabao.framework.obj.DataList;
+import com.dunbian.jujiabao.framework.obj.Page;
+import com.dunbian.jujiabao.framework.util.DateTimeUtil;
+import com.dunbian.jujiabao.service.address.IAddressService;
+import com.dunbian.jujiabao.service.advertisement.IAdvertisementService;
+import com.dunbian.jujiabao.service.cart.ICartService;
+import com.dunbian.jujiabao.service.comment.ICommentService;
+import com.dunbian.jujiabao.service.seckill.ISeckillService;
+import com.dunbian.jujiabao.util.UserUtil;
+
+@Controller
+@RequestMapping("/food")
+public class FoodController {
+	@Resource
+	private IFoodService foodService;
+	
+	@Resource
+	private ICartService cartService; 
+	
+	@Resource
+	private IAddressService addressService;
+	
+	@Resource 
+	private ICommentService commentService;
+	
+	@Resource
+	private ISeckillService seckillService;
+	
+	@Resource
+	private IAdvertisementService advertisementService;
+	
+	public void setCurrentUser(Model model, HttpServletRequest request) {
+		try {
+			model.addAttribute("currentMenu", "home");
+			UserAO user = (UserAO) UserUtil.getCurrentLoginUser(request);
+			model.addAttribute("currentUser", user);
+			int cartCount = cartService.getCartCount(user.getId());
+			model.addAttribute("cartCount", cartCount);
+		} catch (Exception e) {
+		}
+	}
+	
+	@ResponseBody
+	@RequestMapping("/phone/comment-list")
+	public Object getComment(String setId, Integer pageNo, Model model, HttpServletRequest request) {
+		if(setId == null || setId.isEmpty()) {
+			return null;
+		} else {
+			if(pageNo == null) {
+				pageNo = 1;
+			}
+			Page page = new Page(pageNo, 5);
+			Map<String, Object> retData = new HashMap<String, Object>();
+			DataList<CommentAO> ret = commentService.getCommentListBySet(setId, page);
+			if(ret.getData() != null) {
+				retData.put("dataList", ret.getData());
+				if(ret.getData().size() == page.getPageSize()) {
+					retData.put("haveMore", true);
+				} else {
+					retData.put("haveMore", false);
+				}
+			}
+			return retData;
+		}
+	}
+	
+	
+	@RequestMapping("/comment-list")
+	public ModelAndView getCommentPc(String setid, Integer pageNo, Model model, HttpServletRequest request) {
+		if(setid == null || setid.isEmpty()) {
+			return null;
+		} else {
+			if(pageNo == null) {
+				pageNo = 1;
+			}
+			Page page = new Page(pageNo, 5);
+			DataList<CommentAO> ret = commentService.getCommentListBySet(setid, page);
+			if(ret.getData() != null) {
+				model.addAttribute("dataList", ret.getData());
+				if(ret.getData().size() == page.getPageSize()) {
+					model.addAttribute("haveMore", true);
+				} else {
+					model.addAttribute("haveMore", false);
+				}
+			}
+			
+			model.addAttribute("pageNo", ++pageNo);
+			model.addAttribute("setid", setid);
+			if(pageNo > 2) {
+				return MVCViewName.INDEX_COMMENTITEM.view();
+			}
+			return MVCViewName.INDEX_COMMENT.view();
+		}
+	}
+	
+	private void filterFoodSetByAddressType(List<FoodSetAO> data, UserAO user) {
+		if(data == null || user == null) {
+			return;
+		}
+		
+		UserAddressAO address = addressService.getDefaultAddress(user.getId());
+		if(address == null) {
+			return;
+		}
+		RegionAO region = addressService.getRegionById(address.getBlockId());
+		if(RegionAO.TYPE_COMMUNITY.equals(region.getType())) {
+			Iterator<FoodSetAO> it = data.iterator();
+			while(it.hasNext()) {
+				FoodSetAO food = it.next();
+				if(food.getPrice() != null && food.getPrice().doubleValue() <=15 && food.getPrice().doubleValue() > 2) {
+					it.remove();
+				}
+			}
+		}
+	}
+	
+	@ResponseBody
+	@RequestMapping("")
+	public Object foodList(String time, @CookieValue(value="town",defaultValue="") String town,Model model, HttpServletRequest request) {
+		String startTimeStr = "8:00";
+		String endTimeStr = "11:00";
+		String deliveryTimeStr = "12:00-13:00";
+		
+		List<FoodSetAO> data = foodService.getFoodSetList(time).getData();
+		UserAO user = null;
+		try {
+			user = (UserAO) UserUtil.getCurrentLoginUser(request);
+		} catch (Exception e) {
+		}
+		if(user != null) {
+			filterFoodSetByAddressType(data, user);
+		}
+		
+		model.addAttribute("dataList", data);
+		model.addAttribute("time", time);
+		
+		String leftTime = "";
+		boolean canOrder = true;
+		Date endTime = null;
+		if (!town.trim().isEmpty()) {
+			RegionTimeAO regionTimeAO = addressService.getRegionTime(town);
+			if (regionTimeAO != null && regionTimeAO.getEndTime() != null) {
+				endTime = regionTimeAO.getEndTime();
+				if(regionTimeAO.getStartTime() != null) {
+					startTimeStr = DateTimeUtil.format(regionTimeAO.getStartTime(),
+							DateTimeUtil.FORMAT_HM);
+				}
+			    if(regionTimeAO.getEndTime() != null) {
+			    	endTimeStr = DateTimeUtil.format(regionTimeAO.getEndTime(),
+							DateTimeUtil.FORMAT_HM);
+			    }
+			    
+			    if(regionTimeAO.getDeliveryTime() != null && !regionTimeAO.getDeliveryTime().isEmpty()) {
+			    	deliveryTimeStr = regionTimeAO.getDeliveryTime();
+			    }
+				
+			} else {//找不到配置对象，暂时给个默认值
+				endTime = DateTimeUtil.parse("11:00", DateTimeUtil.FORMAT_HM);
+			}
+		}
+		
+		if((time == null || time.isEmpty() 
+				|| FoodSetAO.TYPE_TODAY.equals(time))) {//今天菜谱
+			if (!town.trim().isEmpty()) {
+				// 首先把当前的时间的年月日设置到订购限制时间上
+				Date now = new Date();
+				String realEndTimeStr = DateTimeUtil.format(now,
+						DateTimeUtil.FORMAT_YMD)
+						+ " "
+						+ DateTimeUtil.format(endTime, DateTimeUtil.FORMAT_HM);
+				endTime = DateTimeUtil.parse(realEndTimeStr,
+						DateTimeUtil.FORMAT_YMD_HM);
+				long between = (endTime.getTime() - now.getTime()) / 1000;// 除以1000是为了转换成秒
+				if (between < 0) { // 已经超过下单时间
+					leftTime = "今天订餐已结束,明天早点来哦";
+					canOrder = false;
+				} else {
+					long hour = between % (24 * 3600) / 3600;
+					long minute = between % 3600 / 60 + 1;
+					if (hour > 0) {
+						leftTime += "离订餐结束：" + hour + "小时";
+					} else if (minute > 0) {
+						leftTime += "离订餐结束：" + minute + "分";
+					}
+				}
+			}
+			
+			List<SeckillAO> seckillList = seckillService.getSeckillList(town);
+			if(seckillList != null && !seckillList.isEmpty()) {
+				model.addAttribute("seckillList", seckillList);
+				model.addAttribute("now", new Date().getTime());
+			}
+		} else {//明天
+			leftTime = "欢迎明天订购";
+			canOrder = false;
+		}
+		model.addAttribute("leftTime", leftTime);
+		model.addAttribute("canOrder", canOrder);
+		
+		String prefix = "午餐 ";
+		Date start = DateTimeUtil.parse(DateTimeUtil.format(new Date(), DateTimeUtil.FORMAT_YMD) + " " + startTimeStr,DateTimeUtil.FORMAT_YMD_HM);
+		Calendar cl = Calendar.getInstance();
+		cl.setTime(start);
+		int hour = cl.get(Calendar.HOUR_OF_DAY);
+		if(hour > 12) {
+			prefix = "晚餐 ";
+		}
+		model.addAttribute("bookStr", prefix + startTimeStr + "-" + endTimeStr + "预定");
+		model.addAttribute("deliveryStr", deliveryTimeStr + "送达");
+		
+		//广告数据
+		List<AdvertisementAO> advlist = advertisementService.getAdvertisement(town, new Date());
+		if(advlist != null && !advlist.isEmpty()) {
+			AdvertisementAO notice = null;
+			for(Iterator<AdvertisementAO> itr = advlist.iterator(); itr.hasNext();) {
+				AdvertisementAO adv = itr.next();
+				if(AdvertisementAO.TYPE_NOTICE.equals(adv.getType())) {
+					notice = adv;
+					itr.remove();
+				}
+			}
+
+			if(advlist != null && !advlist.isEmpty()) {
+				model.addAttribute("top", advlist);
+			}
+
+			if(notice != null) {
+				model.addAttribute("fill", notice);
+			}
+		}
+		
+		
+		setCurrentUser(model, request);
+		return MVCViewName.INDEX_INDEX.view();
+	}
+	
+	@ResponseBody
+	@RequestMapping("/phone")
+	public Object phoneList(String time, @CookieValue(value="town",defaultValue="") String town, Model model, HttpServletRequest request) {
+		
+		List<FoodSetAO> data = foodService.getFoodSetList(time).getData();
+		
+		UserAO user = null;
+		try {
+			user = (UserAO) UserUtil.getCurrentLoginUser(request);
+		} catch (Exception e) {
+		}
+		if(user != null) {
+			filterFoodSetByAddressType(data, user);
+		}
+		
+		//解决兼容性问题
+		String appVersion = request.getHeader("AppVersion");
+		if(appVersion == null || Integer.parseInt(appVersion.trim()) <= 2) {
+			if(data != null) {
+				int i=0;
+				for(Iterator<FoodSetAO> itr = data.iterator(); itr.hasNext();){
+					itr.next();
+					if(i++ >= 3) {
+						itr.remove();
+					}
+				} 
+			}
+		}
+		Map<String, Object> retMap = new HashMap<String, Object>();
+		retMap.put("dataList", data);
+		String startTimeStr = "8:00";
+		String endTimeStr = "11:00";
+		String deliveryTimeStr = "12:00-13:00";
+		
+		String leftTime = "";
+		boolean canOrder = true;
+		Date endTime = null;
+		if (!town.trim().isEmpty()) {
+			RegionTimeAO regionTimeAO = addressService.getRegionTime(town);
+			if (regionTimeAO != null && regionTimeAO.getEndTime() != null) {
+				endTime = regionTimeAO.getEndTime();
+				if(regionTimeAO.getStartTime() != null) {
+					startTimeStr = DateTimeUtil.format(regionTimeAO.getStartTime(),
+							DateTimeUtil.FORMAT_HM);
+				}
+			    if(regionTimeAO.getEndTime() != null) {
+			    	endTimeStr = DateTimeUtil.format(regionTimeAO.getEndTime(),
+							DateTimeUtil.FORMAT_HM);
+			    }
+			    if(regionTimeAO.getDeliveryTime() != null && !regionTimeAO.getDeliveryTime().isEmpty()) {
+			    	deliveryTimeStr = regionTimeAO.getDeliveryTime();
+			    }
+			}
+		}
+		
+		if((time == null || time.isEmpty() 
+				|| FoodSetAO.TYPE_TODAY.equals(time))) {//今天菜谱
+			if (!town.trim().isEmpty()) {
+				// 首先把当前的时间的年月日设置到订购限制时间上
+				Date now = new Date();
+				String realEndTimeStr = DateTimeUtil.format(now,
+						DateTimeUtil.FORMAT_YMD)
+						+ " "
+						+ DateTimeUtil.format(endTime, DateTimeUtil.FORMAT_HM);
+				endTime = DateTimeUtil.parse(realEndTimeStr,  
+						DateTimeUtil.FORMAT_YMD_HM);
+				long between = (endTime.getTime() - now.getTime()) / 1000;// 除以1000是为了转换成秒
+				if (between < 0) { // 已经超过下单时间
+					leftTime = "订餐已结束";
+					canOrder = false;
+				} else {
+					long hour = between % (24 * 3600) / 3600;
+					long minute = between % 3600 / 60 + 1;
+					if (hour > 0) {
+						leftTime += "离订餐结束：" + hour + "小时";
+					} else if (minute > 0) {
+						leftTime += "离订餐结束：" + minute + "分";
+					}
+				}
+			}
+			
+			List<SeckillAO> seckillList = seckillService.getSeckillList(town);
+			if(seckillList != null && !seckillList.isEmpty()) {
+				retMap.put("miaosha", seckillList);
+			}
+		} else {//明天
+			leftTime = "欢迎明天订购";
+			canOrder = false;
+		}
+		
+		retMap.put("leftTime", leftTime);
+		retMap.put("canOrder", canOrder);
+		String prefix = "午餐 ";
+		Date start = DateTimeUtil.parse(DateTimeUtil.format(new Date(), DateTimeUtil.FORMAT_YMD) + " " + startTimeStr,DateTimeUtil.FORMAT_YMD_HM);
+		Calendar cl = Calendar.getInstance();
+		cl.setTime(start);
+		int hour = cl.get(Calendar.HOUR_OF_DAY);
+		if(hour > 12) {
+			prefix = "晚餐 ";
+		}
+		retMap.put("bookStr", prefix + startTimeStr + "-" + endTimeStr + "预定");
+		retMap.put("deliveryStr", deliveryTimeStr + "送达");
+		return retMap;
+	}
+	
+	@ResponseBody
+	@RequestMapping("/phone/detail")
+	public Object phoneDetail(@CookieValue(value="town",defaultValue="") String town,String weekId, Model model) {
+		FoodSetAO data = foodService.getFoodSetByWeekId(weekId);
+		Map<String, Object> retMap = new HashMap<String, Object>();
+		
+		String time = null;
+		if(isToday(weekId)) {
+			time = FoodSetAO.TYPE_TODAY;
+		} else {
+			time = FoodSetAO.TYPE_TOMORROW;
+		}
+		boolean canOrder = true;
+		String leftTime = "";
+		if((time == null || time.isEmpty() 
+				|| FoodSetAO.TYPE_TODAY.equals(time))) {//今天菜谱
+			if(!town.trim().isEmpty()) {
+				RegionTimeAO regionTimeAO = addressService.getRegionTime(town);
+				if(regionTimeAO != null && regionTimeAO.getEndTime() != null) {
+					Date endTime = regionTimeAO.getEndTime();
+					//首先把当前的时间的年月日设置到订购限制时间上
+					Date now = new Date();
+					String realEndTimeStr = DateTimeUtil.format(now, DateTimeUtil.FORMAT_YMD) + " " 
+							+ DateTimeUtil.format(endTime, DateTimeUtil.FORMAT_HM);
+					endTime = DateTimeUtil.parse(realEndTimeStr, DateTimeUtil.FORMAT_YMD_HM);
+					long between=(endTime.getTime()-now.getTime())/1000;//除以1000是为了转换成秒
+					if(between < 0) { //已经超过下单时间
+						leftTime = "订餐已结束";
+						canOrder = false;
+					} else {
+						long hour = between%(24*3600)/3600;
+						long minute = between%3600/60 + 1;
+						if(hour>0) {
+							leftTime += "离订餐结束：" + hour + "小时";
+						} else if(minute>0) {
+							leftTime += "离订餐结束：" + minute + "分";
+						}
+					}
+				}
+			}
+		} else {//明天
+			canOrder = false;
+			leftTime = "欢迎明天订购";
+		}
+		retMap.put("canOrder", canOrder);
+		retMap.put("leftTime", leftTime);
+		retMap.put("data", data);
+		return retMap;
+	}
+	
+	@RequestMapping("/detail")
+	public ModelAndView detailPc(String setid, Model model) {
+		FoodSetAO data = foodService.getFoodSet(setid);
+		model.addAttribute("data", data);
+		return MVCViewName.INDEX_DETAIL.view();
+	}
+	
+	private boolean isToday(String weekId) {
+		if(weekId == null || weekId.isEmpty()) {
+			return true;
+		}
+		FoodWeekAO foodWeekAO = foodService.getFoodWeekByWeekId(weekId);
+		Calendar cl = Calendar.getInstance();
+		int day = cl.get(Calendar.DAY_OF_WEEK);
+		day--;
+		if(day == 0) {
+			day = 7;
+		}
+		String todayWeek = day*10+"";
+		if(foodWeekAO.getDay().equals(todayWeek)) {
+			return true;
+		}
+		return false;
+	}
+//	
+//	public static final String DAY_MONDAY = "10";
+//	public static final String DAY_TUESDAY = "20";
+//	public static final String DAY_WEDNESDAY = "30";
+//	public static final String DAY_THURSDAY = "40";
+//	public static final String DAY_FRIDAY = "50";
+//	public static final String DAY_SATURDAY = "60";
+//	public static final String DAY_SUNDAY = "70";
+}
